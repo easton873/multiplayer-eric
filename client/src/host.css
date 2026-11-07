@@ -122,26 +122,26 @@ h1 { font-size: 4.4rem; font-weight: 1000; line-height: 1; text-shadow: 0 0.3rem
 /* ---------- reveal ---------- */
 .reveal { position: relative; }
 .rv-progress { position: absolute; top: 0; left: 0; font-size: 1.5rem; font-weight: 900; color: var(--ink-dim); letter-spacing: 0.15rem; }
-.rv-card { max-width: 80rem; min-width: 40rem; padding: 3rem 4rem; border-radius: 2.4rem; background: #fff; color: #1b1033; box-shadow: 0 1.2rem 0 rgba(0, 0, 0, 0.3); animation: zoomIn 0.45s cubic-bezier(0.2, 1.5, 0.4, 1) both; }
+.rv-card { max-width: 80rem; min-width: 40rem; padding: 3rem 4rem; border-radius: 2.4rem; background: #fff; color: #1b1033; box-shadow: 0 1.2rem 0 rgba(0, 0, 0, 0.3); animation: zoomIn 0.7s cubic-bezier(0.2, 1.5, 0.4, 1) both; }
 .rv-card p { font-size: 3.2rem; font-weight: 800; line-height: 1.22; overflow-wrap: anywhere; }
 .rv-card p.l { font-size: 2.4rem; }
 @keyframes zoomIn { from { transform: scale(0.2) rotate(-8deg); opacity: 0; } }
-.rv-label { font-size: 1.7rem; font-weight: 900; letter-spacing: 0.25rem; text-transform: uppercase; color: var(--ink-dim); opacity: 0; animation: fadeUp 0.3s ease both; animation-delay: var(--d); }
+.rv-label { font-size: 1.7rem; font-weight: 900; letter-spacing: 0.25rem; text-transform: uppercase; color: var(--ink-dim); opacity: 0; animation: fadeUp 0.5s ease both; animation-delay: var(--d); }
 .rv-voters { display: flex; flex-direction: column; align-items: center; gap: 1rem; min-height: 8rem; }
 .rv-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.9rem; }
-.rv-chip { display: flex; align-items: center; gap: 0.6rem; padding: 0.3rem 1.2rem 0.3rem 0.3rem; border-radius: 99rem; background: var(--panel-strong); font-size: 1.7rem; font-weight: 900; animation: dropBounce 0.4s cubic-bezier(0.3, 1.6, 0.5, 1) both; animation-delay: var(--d); opacity: 0; }
+.rv-chip { display: flex; align-items: center; gap: 0.6rem; padding: 0.3rem 1.2rem 0.3rem 0.3rem; border-radius: 99rem; background: var(--panel-strong); font-size: 1.7rem; font-weight: 900; animation: dropBounce 0.6s cubic-bezier(0.3, 1.6, 0.5, 1) both; animation-delay: var(--d); opacity: 0; }
 .rv-chip .av { display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%; background: var(--pc); font-size: 1.8rem; }
 .rv-chip .plus { color: var(--good); }
 @keyframes dropBounce { from { transform: translateY(-9rem) scale(0.4); opacity: 0; } to { opacity: 1; } 100% { opacity: 1; } }
 .rv-none { font-size: 2.4rem; font-weight: 900; color: var(--ink-dim); opacity: 0; animation: fadeUp 0.5s ease both; animation-delay: var(--d); }
-.rv-author { display: flex; align-items: center; gap: 1rem; font-size: 2rem; font-weight: 900; opacity: 0; animation: fadeUp 0.4s ease both; animation-delay: var(--d); }
+.rv-author { display: flex; align-items: center; gap: 1rem; font-size: 2rem; font-weight: 900; opacity: 0; animation: fadeUp 0.6s ease both; animation-delay: var(--d); }
 .rv-author .rv-chip { animation: none; opacity: 1; font-size: 2.2rem; }
 .rv-author .rv-chip .av { width: 3.8rem; height: 3.8rem; font-size: 2.3rem; }
 .rv-author .pts { padding: 0.3rem 1.2rem; border-radius: 99rem; background: var(--good); color: #0e3a28; font-size: 1.9rem; }
 @keyframes fadeUp { from { transform: translateY(2rem); opacity: 0; } to { opacity: 1; } }
-.reveal.real .rv-card { background: linear-gradient(135deg, #fff6c9, #ffd23f 50%, #fff2a8); box-shadow: 0 0 8rem rgba(255, 210, 63, 0.8), 0 1.2rem 0 #a67c00; animation: zoomIn 0.45s cubic-bezier(0.2, 1.5, 0.4, 1) both, shimmer 2.5s linear infinite 1s; background-size: 200% 100%; }
+.reveal.real .rv-card { background: linear-gradient(135deg, #fff6c9, #ffd23f 50%, #fff2a8); box-shadow: 0 0 8rem rgba(255, 210, 63, 0.8), 0 1.2rem 0 #a67c00; animation: zoomIn 0.7s cubic-bezier(0.2, 1.5, 0.4, 1) both, shimmer 2.5s linear infinite 1s; background-size: 200% 100%; }
 @keyframes shimmer { to { background-position: -200% 0; } }
-.rv-banner { font-size: 3.6rem; font-weight: 1000; letter-spacing: 0.4rem; color: var(--accent); text-shadow: 0 0.3rem 0 #8a6a00; animation: stamp 0.4s cubic-bezier(0.3, 1.8, 0.5, 1) both; }
+.rv-banner { font-size: 3.6rem; font-weight: 1000; letter-spacing: 0.4rem; color: var(--accent); text-shadow: 0 0.3rem 0 #8a6a00; animation: stamp 0.6s cubic-bezier(0.3, 1.8, 0.5, 1) both; }
 @keyframes stamp { from { transform: scale(4) rotate(-12deg); opacity: 0; } }
 .cf { position: fixed; top: -3rem; width: 1.2rem; height: 2rem; opacity: 0; z-index: 40; pointer-events: none; animation: fall linear forwards; }
 @keyframes fall { 8% { opacity: 1; } 100% { transform: translateY(115vh) translateX(var(--dx)) rotate(var(--rot)); opacity: 1; } }

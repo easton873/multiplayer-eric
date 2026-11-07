@@ -1,7 +1,7 @@
 import QRCode from 'qrcode';
 import './styles-common.css';
 import './host.css';
-import { CATEGORY_META, type ClientState, type PlayerInfo, type RevealEntry, type Timers } from '../../shared/types';
+import { CATEGORY_META, revealTiming, type ClientState, type PlayerInfo, type RevealEntry, type Timers } from '../../shared/types';
 import { $, esc, GAME_NAME, rankPlayers, socket, syncState, timerHTML } from './common';
 
 const STORE = 'multiplayereric.host';
@@ -279,10 +279,7 @@ function votingView(s: ClientState): string {
 function revealView(s: ClientState): string {
   const e: RevealEntry = s.reveal[s.reveal.length - 1];
   const n = e.voterIds.length;
-  // Each reveal card is only on screen for ~3s, so everything is staged inside that window.
-  const t0 = 0.8;
-  const step = Math.min(0.3, 1.1 / Math.max(1, n));
-  const authorDelay = t0 + n * step + 0.2;
+  const { t0, step, authorDelay } = revealTiming(n);
   const size = e.text.length > 130 ? 'l' : '';
   const voters = e.voterIds
     .map((id, i) => {
@@ -302,7 +299,7 @@ function revealView(s: ClientState): string {
     ${e.isReal ? '<div class="rv-banner">✨ THE REAL ANSWER ✨</div>' : ''}
     <div class="rv-card"><p class="${size}">${esc(e.text)}</p></div>
     <div class="rv-voters">
-      ${n ? `<div class="rv-label" style="--d:${(t0 - 0.3).toFixed(2)}s">${e.isReal ? 'Found it' : 'Fooled'}</div><div class="rv-chips">${voters}</div>` : e.isReal ? '' : ''}
+      ${n ? `<div class="rv-label" style="--d:${(t0 - 0.5).toFixed(2)}s">${e.isReal ? 'Found it' : 'Fooled'}</div><div class="rv-chips">${voters}</div>` : e.isReal ? '' : ''}
     </div>
     ${tail}
   </section>`;
