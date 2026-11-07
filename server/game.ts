@@ -24,7 +24,7 @@ type IO = Server<ClientToServerEvents, ServerToClientEvents>;
 // Fixed-length beats. TIMING_SCALE lets the test simulation run fast.
 const SCALE = Number(process.env.TIMING_SCALE ?? 1);
 const CATEGORY_RESULT_MS = 5000 * SCALE;
-const SUMMARY_MS = 10000 * SCALE;
+const SUMMARY_MS = 5000 * SCALE;
 
 export const ROOM_IDLE_MS = 15 * 60 * 1000;
 
