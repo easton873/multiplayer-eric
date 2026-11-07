@@ -1,7 +1,7 @@
 # Render Blueprint: deploys the game as a single free web service (server + built client).
 services:
   - type: web
-    name: bluff-night
+    name: multiplayer-eric
     runtime: node
     plan: free
     buildCommand: npm install --include=dev && npm run build

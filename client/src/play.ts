@@ -11,7 +11,7 @@ interface View {
 }
 
 const app = $('#app')!;
-const STORE = 'bluffnight.player';
+const STORE = 'multiplayereric.player';
 
 let state: ClientState | null = null;
 let me: { code: string; token: string; name: string; id: string } | null = null;

@@ -1,7 +1,7 @@
 import { io, type Socket } from 'socket.io-client';
 import type { ClientState, ClientToServerEvents, ServerToClientEvents } from '../../shared/types';
 
-export const GAME_NAME = 'Bluff Night';
+export const GAME_NAME = 'Multiplayer Eric';
 
 export const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io({ transports: ['websocket', 'polling'] });
 

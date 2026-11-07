@@ -41,7 +41,7 @@ h1 { font-size: 4.4rem; font-weight: 1000; line-height: 1; text-shadow: 0 0.3rem
 /* ---------- lobby ---------- */
 .lobby { flex-direction: row !important; align-items: stretch !important; text-align: left !important; gap: 4rem !important; padding: 0 2rem; }
 .lobby-left { flex: 0 0 38%; display: flex; flex-direction: column; justify-content: center; gap: 2rem; }
-.logo { font-size: 7.2rem; line-height: 0.88; font-weight: 1000; letter-spacing: -0.2rem; background: linear-gradient(90deg, #ffd23f, #ff4d6d 55%, #c77dff); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0.4rem 0 rgba(0, 0, 0, 0.3)); animation: wobble 4s ease-in-out infinite; transform-origin: left center; }
+.logo { font-size: 5.4rem; line-height: 0.88; font-weight: 1000; letter-spacing: -0.2rem; background: linear-gradient(90deg, #ffd23f, #ff4d6d 55%, #c77dff); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0.4rem 0 rgba(0, 0, 0, 0.3)); animation: wobble 4s ease-in-out infinite; transform-origin: left center; }
 @keyframes wobble { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(1.5deg) scale(1.02); } }
 .join-card { display: flex; gap: 2rem; align-items: center; padding: 1.6rem; border-radius: 2rem; background: var(--panel); border: 2px solid var(--panel-strong); }
 .join-card .qr { width: 13rem; height: 13rem; border-radius: 1rem; background: #fff; flex: none; }
