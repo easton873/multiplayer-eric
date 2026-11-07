@@ -10,7 +10,7 @@ A Jackbox-style bluffing party game. One laptop/TV shows the main screen, everyo
 4. **Read** – the answers (fakes + the real one) appear on the big screen one at a time; players tick "I've read it" or the timer runs out.
 5. **Vote** – each player picks the answer they think is real from a list (no voting for your own).
 6. **Reveal** – answers are revealed from fewest to most votes (answers with no votes are skipped), showing who voted for it and who wrote it. The real answer is always last.
-7. **Score** – +1 for voting for the real answer, +1 for each vote your answer gets. A 10-second scoreboard, then the next round.
+7. **Score** – +1 for voting for the real answer, +1 for each vote your answer gets. A 5-second scoreboard, then the next round.
 
 The game ends at the end of the round in which someone reaches **X points**, or after **X rounds** (chosen in the lobby; ties are allowed).
 
