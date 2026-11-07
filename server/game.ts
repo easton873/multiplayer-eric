@@ -8,6 +8,8 @@ import {
   type ClientToServerEvents,
   type OptionPublic,
   type Phase,
+  REVEAL_HOLD_MS,
+  revealTiming,
   type PlayerInfo,
   type RevealEntry,
   type ServerToClientEvents,
@@ -22,7 +24,6 @@ type IO = Server<ClientToServerEvents, ServerToClientEvents>;
 // Fixed-length beats. TIMING_SCALE lets the test simulation run fast.
 const SCALE = Number(process.env.TIMING_SCALE ?? 1);
 const CATEGORY_RESULT_MS = 5000 * SCALE;
-const REVEAL_MS = 10000 * SCALE;
 const SUMMARY_MS = 10000 * SCALE;
 
 export const ROOM_IDLE_MS = 15 * 60 * 1000;
@@ -438,13 +439,19 @@ export class Room {
     this.cur.revealEntries = [...fakes, real];
     this.cur.revealIndex = 0;
     this.phase = 'reveal';
-    this.arm(REVEAL_MS, () => this.nextReveal());
+    this.arm(this.revealMs(0), () => this.nextReveal());
+  }
+
+  /** Each reveal card stays up for exactly as long as its animation takes, plus a short hold. */
+  private revealMs(index: number) {
+    const e = this.cur.revealEntries[index];
+    return (revealTiming(e.voterIds.length).endMs + REVEAL_HOLD_MS) * SCALE;
   }
 
   private nextReveal() {
     if (this.cur.revealIndex < this.cur.revealEntries.length - 1) {
       this.cur.revealIndex++;
-      this.arm(REVEAL_MS, () => this.nextReveal());
+      this.arm(this.revealMs(this.cur.revealIndex), () => this.nextReveal());
     } else {
       this.phase = 'summary';
       this.arm(SUMMARY_MS, () => this.afterSummary());

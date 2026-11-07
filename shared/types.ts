@@ -38,13 +38,26 @@ export interface Settings {
   timers: Timers;
 }
 
+/**
+ * Staging of one "who fooled who" reveal card, in seconds. The big screen uses it to schedule animations
+ * and the server uses it to move on as soon as the animation has finished (plus a short hold).
+ */
+export const REVEAL_HOLD_MS = 1500;
+export function revealTiming(voterCount: number) {
+  const t0 = 2.3; // voters start dropping in
+  const step = Math.min(0.55, 3.6 / Math.max(1, voterCount));
+  const authorDelay = t0 + voterCount * step + 0.5;
+  const endSec = voterCount === 0 ? t0 + 0.5 : authorDelay + 0.6;
+  return { t0, step, authorDelay, endMs: Math.round(endSec * 1000) };
+}
+
 export type SettingsPatch = Partial<Omit<Settings, 'timers'>> & { timers?: Partial<Timers> };
 
 export const DEFAULT_SETTINGS: Settings = {
   endMode: 'points',
   target: 10,
   maxAnswerLength: 180,
-  timers: { preview: 6, categoryVote: 30, writing: 120, read: 30, voting: 60 },
+  timers: { preview: 2, categoryVote: 30, writing: 120, read: 30, voting: 60 },
 };
 
 export interface PlayerInfo {

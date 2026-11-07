@@ -1,7 +1,7 @@
 import QRCode from 'qrcode';
 import './styles-common.css';
 import './host.css';
-import { CATEGORY_META, type ClientState, type PlayerInfo, type RevealEntry, type Timers } from '../../shared/types';
+import { CATEGORY_META, revealTiming, type ClientState, type PlayerInfo, type RevealEntry, type Timers } from '../../shared/types';
 import { $, esc, GAME_NAME, rankPlayers, socket, syncState, timerHTML } from './common';
 
 const STORE = 'multiplayereric.host';
@@ -279,9 +279,7 @@ function votingView(s: ClientState): string {
 function revealView(s: ClientState): string {
   const e: RevealEntry = s.reveal[s.reveal.length - 1];
   const n = e.voterIds.length;
-  const t0 = 2.3;
-  const step = Math.min(0.55, 3.6 / Math.max(1, n));
-  const authorDelay = t0 + n * step + 0.5;
+  const { t0, step, authorDelay } = revealTiming(n);
   const size = e.text.length > 130 ? 'l' : '';
   const voters = e.voterIds
     .map((id, i) => {
