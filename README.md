@@ -1,4 +1,4 @@
-# Bluff Night
+# Multiplayer Eric
 
 A Jackbox-style bluffing party game. One laptop/TV shows the main screen, everyone else plays on their phone.
 

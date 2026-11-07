@@ -4,7 +4,7 @@ import './host.css';
 import { CATEGORY_META, type ClientState, type PlayerInfo, type RevealEntry, type Timers } from '../../shared/types';
 import { $, esc, GAME_NAME, rankPlayers, socket, syncState, timerHTML } from './common';
 
-const STORE = 'bluffnight.host';
+const STORE = 'multiplayereric.host';
 const stage = $('#stage')!;
 const strip = $('#strip')!;
 const hudTimer = $('#hudTimer')!;
