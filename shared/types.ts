@@ -44,7 +44,7 @@ export const DEFAULT_SETTINGS: Settings = {
   endMode: 'points',
   target: 10,
   maxAnswerLength: 180,
-  timers: { preview: 6, categoryVote: 30, writing: 120, read: 30, voting: 60 },
+  timers: { preview: 2, categoryVote: 30, writing: 120, read: 30, voting: 60 },
 };
 
 export interface PlayerInfo {
