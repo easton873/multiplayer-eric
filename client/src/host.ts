@@ -79,7 +79,7 @@ async function prepareJoinInfo() {
       /* fall back to origin */
     }
   }
-  qrDataUrl = await QRCode.toDataURL(`${joinBase}/play.html?room=${roomCode}`, { margin: 1, width: 520, color: { dark: '#1b1033', light: '#ffffff' } });
+  qrDataUrl = await QRCode.toDataURL(`${joinBase}/play.html?room=${roomCode}`, { margin: 1, width: 520, color: { dark: '#2e2519', light: '#fbf6ea' } });
   viewKey = '';
   render();
 }
@@ -89,11 +89,11 @@ async function prepareJoinInfo() {
 const byId = (s: ClientState, id: string | null) => s.players.find((p) => p.id === id);
 
 function avatar(p: PlayerInfo | undefined, cls = 'av') {
-  return `<span class="${cls}" style="--pc:${p?.color ?? '#888'}">${p?.emoji ?? '❔'}</span>`;
+  return `<span class="${cls}" style="--pc:${p?.color ?? '#8a7a5e'}">${p?.emoji ?? '❔'}</span>`;
 }
 
 function confetti(count = 140) {
-  const colors = ['#ffd23f', '#ff4d6d', '#2ec4ff', '#3ddc97', '#c77dff', '#ff9f1c', '#ffffff'];
+  const colors = ['#5f4580', '#2b7a78', '#a8926a', '#8a6fb0', '#4fa09c', '#efe5cf'];
   for (let i = 0; i < count; i++) {
     const el = document.createElement('i');
     el.className = 'cf';
@@ -159,7 +159,7 @@ function lobbyView(s: ClientState): string {
         <label><span id="targetLabel">Points to win</span><input id="target" type="number" min="1" max="999" /></label>
         <label>Max answer length<input id="maxLen" type="number" min="20" max="1000" step="10" /></label>
         ${sel('preview', 'Prompt preview (each)')}
-        ${sel('categoryVote', 'Prompt vote')}
+        ${sel('categoryPick', 'Prompt pick')}
         ${sel('writing', 'Writing')}
         ${sel('read', 'Reading (each answer)')}
         ${sel('voting', 'Answer vote')}
@@ -215,24 +215,26 @@ function previewView(s: ClientState): string {
     <div class="eyebrow">Round ${s.round} · Option ${s.previewIndex + 1} of 5</div>
     <div class="pcard cat-${o.category}"><div class="ic">${m.icon}</div><div class="lb">${m.label}</div><div class="pr">${esc(o.prompt)}</div><div class="in">${m.short}</div></div>
     <div class="pdots">${[0, 1, 2, 3, 4].map((i) => `<i class="${i <= s.previewIndex ? 'on' : ''}"></i>`).join('')}</div>
-    <div class="sub">Read them all — you'll vote on which to play</div>
+    <div class="sub">Read them all — next up, one player picks which to play</div>
   </section>`;
 }
 
-function categoryVoteView(s: ClientState): string {
+function categoryPickView(s: ClientState): string {
+  const picker = s.players.find((p) => p.id === s.pickerId);
   return `<section>
-    <h1>Vote for a prompt!</h1>
-    <div class="sub">Use your phone · <b data-done></b> voted</div>
+    <h1>${picker ? `${picker.emoji} ${esc(picker.name)}, pick a prompt!` : 'Pick a prompt!'}</h1>
+    <div class="sub">Round ${s.round} · choose on your phone</div>
     <div class="cgrid">${s.options.map((o, i) => cardHTML(o, 'ccard', '', i)).join('')}</div>
   </section>`;
 }
 
 function categoryResultView(s: ClientState): string {
   const m = CATEGORY_META[s.options[s.chosen!].category];
+  const picker = s.players.find((p) => p.id === s.pickerId);
   return `<section class="cresult">
-    <h1>${m.icon} ${m.label} it is!</h1>
+    <h1>${m.icon} ${picker ? `${esc(picker.name)} picked ` : ''}${m.label}!</h1>
     <div class="cgrid">${s.options
-      .map((o, i) => cardHTML(o, 'ccard ' + (i === s.chosen ? 'win' : 'dim'), `<div class="tl" style="--i:${i}">${s.tally![i]}</div>`, i))
+      .map((o, i) => cardHTML(o, 'ccard ' + (i === s.chosen ? 'win' : 'dim'), '', i))
       .join('')}</div>
   </section>`;
 }
@@ -368,7 +370,7 @@ function keyFor(s: ClientState): string {
 }
 
 function stripLive(s: ClientState) {
-  const show = ['categoryVote', 'writing', 'readAnswers', 'voting'].includes(s.phase);
+  const show = ['writing', 'readAnswers', 'voting'].includes(s.phase);
   strip.hidden = !show;
   if (!show) return;
   syncChildren(
@@ -399,7 +401,7 @@ function liveUpdate(s: ClientState) {
 const VIEWS: Record<string, (s: ClientState) => string> = {
   lobby: lobbyView,
   preview: previewView,
-  categoryVote: categoryVoteView,
+  categoryPick: categoryPickView,
   categoryResult: categoryResultView,
   writing: writingView,
   readAnswers: readView,

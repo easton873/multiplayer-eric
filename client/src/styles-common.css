@@ -1,18 +1,23 @@
 :root {
-  --bg-1: #1b1033;
-  --bg-2: #2a1458;
-  --ink: #fff;
-  --ink-dim: #c9b8ee;
-  --panel: rgba(255, 255, 255, 0.09);
-  --panel-strong: rgba(255, 255, 255, 0.16);
-  --accent: #ffd23f;
-  --accent-2: #ff4d6d;
-  --good: #3ddc97;
-  --c-word: #ff9f1c;
-  --c-date: #2ec4ff;
-  --c-movie: #ff4d6d;
-  --c-acronym: #3ddc97;
-  --c-person: #c77dff;
+  --bg-1: #d6c5a5; /* tan */
+  --bg-2: #e6d9bf; /* lighter tan: surfaces */
+  --surface: #efe5cf;
+  --line: #bba983;
+  --ink: #2e2519;
+  --ink-dim: #6a5b45;
+  --on-accent: #f4ecda;
+  --panel: rgba(70, 50, 20, 0.08);
+  --panel-strong: rgba(70, 50, 20, 0.16);
+  --accent: #5f4580; /* purple */
+  --accent-dark: #432f5e;
+  --accent-2: #a14b36; /* muted clay: urgent / errors */
+  --good: #2b7a78; /* teal */
+  --good-dark: #1d5856;
+  --c-word: #5f4580;
+  --c-date: #2b7a78;
+  --c-movie: #a14b36;
+  --c-acronym: #7d7a3c;
+  --c-person: #4e6178;
   --font: ui-rounded, 'SF Pro Rounded', 'Nunito', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -20,7 +25,7 @@ html, body { height: 100%; }
 body {
   font-family: var(--font);
   color: var(--ink);
-  background: radial-gradient(1200px 800px at 20% 0%, var(--bg-2), var(--bg-1) 70%) fixed;
+  background: var(--bg-1);
   overflow-x: hidden;
 }
 [hidden] { display: none !important; }
@@ -34,7 +39,7 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; }
 .timer { position: relative; display: grid; place-items: center; font-weight: 900; }
 .timer svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
 .timer circle { fill: none; stroke-width: 3.2; }
-.timer .track { stroke: rgba(255, 255, 255, 0.18); }
+.timer .track { stroke: rgba(70, 50, 20, 0.18); }
 .timer .arc { stroke: var(--accent); stroke-linecap: round; stroke-dasharray: 100.5; stroke-dashoffset: calc(100.5 * (1 - var(--frac, 1))); transition: stroke-dashoffset 0.25s linear; }
 .timer.urgent .arc { stroke: var(--accent-2); }
 .timer.urgent { color: var(--accent-2); animation: throb 0.5s ease-in-out infinite alternate; }

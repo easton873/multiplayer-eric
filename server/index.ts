@@ -98,8 +98,8 @@ io.on('connection', (socket) => {
   socket.on('host:kick', (p) => room && role === 'host' && room.kick(String(p?.playerId)));
 
   const pid = () => (socket.data as { playerId?: string }).playerId;
-  socket.on('player:categoryVote', ({ index }) => {
-    if (room && role === 'player' && pid()) room.categoryVote(pid()!, Number(index));
+  socket.on('player:categoryPick', ({ index }) => {
+    if (room && role === 'player' && pid()) room.categoryPick(pid()!, Number(index));
   });
   socket.on('player:answer', ({ text }, cb) => {
     if (!room || role !== 'player' || !pid()) return;
