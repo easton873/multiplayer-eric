@@ -13,8 +13,8 @@ export const CATEGORY_META: Record<Category, { label: string; icon: string; inst
 export type Phase =
   | 'lobby'
   | 'preview' // the five prompts are shown one at a time
-  | 'categoryVote' // everyone votes on which prompt to play
-  | 'categoryResult' // winner announced
+  | 'categoryPick' // this round's picker chooses which prompt to play
+  | 'categoryResult' // chosen prompt announced
   | 'writing' // everyone writes a bluff
   | 'readAnswers' // answers shown one at a time, players tick "read"
   | 'voting' // everyone votes for the answer they think is real
@@ -25,7 +25,7 @@ export type Phase =
 /** Timer values are seconds. 0 means "unlimited" (host skips manually / phase ends when everyone is done). */
 export interface Timers {
   preview: number; // seconds each of the 5 prompts stays on screen
-  categoryVote: number;
+  categoryPick: number;
   writing: number;
   read: number; // per answer
   voting: number;
@@ -57,7 +57,7 @@ export const DEFAULT_SETTINGS: Settings = {
   endMode: 'points',
   target: 10,
   maxAnswerLength: 180,
-  timers: { preview: 2, categoryVote: 30, writing: 120, read: 30, voting: 60 },
+  timers: { preview: 2, categoryPick: 30, writing: 120, read: 30, voting: 60 },
 };
 
 export interface PlayerInfo {
@@ -94,7 +94,7 @@ export interface RevealEntry {
 export interface YouInfo {
   id: string;
   participating: boolean;
-  categoryVote: number | null;
+  isPicker: boolean;
   submitted: boolean;
   submittedText: string | null;
   hasRead: boolean;
@@ -114,7 +114,8 @@ export interface ClientState {
   options: OptionPublic[];
   previewIndex: number;
   chosen: number | null;
-  tally: number[] | null;
+  /** The player choosing this round's prompt (rotates round-robin). */
+  pickerId: string | null;
   answers: AnswerPublic[];
   readIndex: number;
   answerTotal: number;
@@ -140,7 +141,7 @@ export interface ClientToServerEvents {
   'host:playAgain': () => void;
   'host:kick': (p: { playerId: string }) => void;
   'player:join': (p: { code: string; name: string; token?: string }, cb: Ack<{ token: string; playerId: string }>) => void;
-  'player:categoryVote': (p: { index: number }) => void;
+  'player:categoryPick': (p: { index: number }) => void;
   'player:answer': (p: { text: string }, cb?: Ack) => void;
   'player:read': (p: { read: boolean }) => void;
   'player:vote': (p: { answerId: string }, cb?: Ack) => void;

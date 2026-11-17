@@ -62,13 +62,14 @@ async function main() {
   assert.equal(bad.ok, false, 'bad code rejected');
 
   // Rounds mode, 2 rounds. Writing is unlimited (0) so it must end when everyone has submitted.
-  host.emit('host:settings', { endMode: 'rounds', target: 2, timers: { preview: 1, categoryVote: 0, writing: 0, read: 0, voting: 0 } });
+  host.emit('host:settings', { endMode: 'rounds', target: 2, timers: { preview: 1, categoryPick: 0, writing: 0, read: 0, voting: 0 } });
   await sleep(100);
   assert.equal(hostState!.settings.endMode, 'rounds');
   assert.equal(hostState!.settings.timers.writing, 0);
   host.emit('host:start');
 
   let ownVoteRejected = false;
+  const pickers: string[] = [];
   let readSeen = 0;
   const phasesSeen = new Set<string>();
   const t0 = Date.now();
@@ -83,11 +84,17 @@ async function main() {
     const key = `${s.round}:${s.phase}:${s.readIndex}`;
     if (!handled.has(key)) {
       handled.add(key);
-      if (s.phase === 'categoryVote') {
+      if (s.phase === 'categoryPick') {
         assert.equal(s.options.length, 5, '5 options visible');
         assert.equal(new Set(s.options.map((o) => o.category)).size, 5, 'one of each category');
-        // everyone votes -> phase should end early (categoryVote timer is unlimited)
-        bots.forEach((b, i) => b.sock.emit('player:categoryVote', { index: i % 5 }));
+        // only the picker may choose; round-robin means a different picker each round
+        assert(s.pickerId, 'picker assigned');
+        pickers.push(s.pickerId!);
+        const nonPicker = bots.find((b) => b.id !== s.pickerId)!;
+        nonPicker.sock.emit('player:categoryPick', { index: 0 });
+        await sleep(100);
+        assert.equal(hostState!.phase, 'categoryPick', 'non-picker cannot choose');
+        bots.find((b) => b.id === s.pickerId)!.sock.emit('player:categoryPick', { index: 1 });
       } else if (s.phase === 'writing') {
         bots.forEach((b, i) => (b.sock as any).emit('player:answer', { text: `Bluff number ${i} ` + 'x'.repeat(300) }, () => {}));
         // double submit must fail
@@ -145,10 +152,11 @@ async function main() {
   const final = hostState!;
   assert.equal(final.round, 2, 'two rounds played');
   assert(final.winnerIds.length >= 1);
-  for (const ph of ['preview', 'categoryVote', 'categoryResult', 'writing', 'readAnswers', 'voting', 'reveal', 'summary', 'gameOver'])
+  for (const ph of ['preview', 'categoryPick', 'categoryResult', 'writing', 'readAnswers', 'voting', 'reveal', 'summary', 'gameOver'])
     assert(phasesSeen.has(ph), `phase ${ph} seen`);
   assert.deepEqual(leaks, [], 'no leaks');
   assert(ownVoteRejected);
+  assert(pickers.length >= 2 && new Set(pickers).size === pickers.length, 'picker rotates each round');
   assert(readSeen >= 10, 'read phase stepped through answers');
   console.log('final scores:', final.players.map((p) => `${p.name}=${p.score}`).join(' '), '| winners:', final.winnerIds.length);
 
@@ -159,7 +167,7 @@ async function main() {
   assert(hostState!.players.every((p) => p.score === 0));
 
   // points mode ends the round someone reaches the target
-  host.emit('host:settings', { endMode: 'points', target: 1, timers: { preview: 1, categoryVote: 1, writing: 1, read: 1, voting: 1 } });
+  host.emit('host:settings', { endMode: 'points', target: 1, timers: { preview: 1, categoryPick: 1, writing: 1, read: 1, voting: 1 } });
   host.emit('host:start');
   const t1 = Date.now();
   while (hostState!.phase !== 'gameOver') {

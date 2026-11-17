@@ -5,7 +5,7 @@ A Jackbox-style bluffing party game. One laptop/TV shows the main screen, everyo
 **How a round works**
 
 1. **Options** – five prompts appear on the big screen one at a time: a *word*, a *date*, a *movie*, an *acronym* and a *person*.
-2. **Vote** – everyone votes (on their phone) for the prompt they want to play. Ties are broken randomly.
+2. **Pick** – one player (rotating round-robin, in join order) chooses which prompt to play on their phone. If they don't pick in time, one is chosen at random.
 3. **Write** – everybody writes a convincing fake answer (180 characters by default). Nobody sees the real one.
 4. **Read** – the answers (fakes + the real one) appear on the big screen one at a time; players tick "I've read it" or the timer runs out.
 5. **Vote** – each player picks the answer they think is real from a list (no voting for your own).
@@ -32,7 +32,7 @@ Other scripts: `npm run typecheck`, `npm run test:sim` (plays full bot games ove
 
 - Game ends when someone reaches **X points**, or after **X rounds**
 - Max answer length (default 180)
-- Timers for: each prompt preview, prompt vote, writing, reading (per answer), answer vote. Each can be set to **Unlimited** – the phase then ends when everybody is done, or when the host presses **Skip** (button or space bar).
+- Timers for: each prompt preview, prompt pick, writing, reading (per answer), answer vote. Each can be set to **Unlimited** – the phase then ends when everybody is done, or when the host presses **Skip** (button or space bar).
 
 Phases also end early as soon as every connected player has finished. Players who reconnect (refresh, lock their phone) rejoin automatically and keep their score. If the host screen disconnects the game pauses, and the room is kept for 15 minutes.
 

@@ -28,7 +28,7 @@ const SUMMARY_MS = 5000 * SCALE;
 
 export const ROOM_IDLE_MS = 15 * 60 * 1000;
 
-const COLORS = ['#ff4d6d', '#ff9f1c', '#ffd23f', '#3ddc97', '#2ec4ff', '#7b6cff', '#c77dff', '#ff70a6', '#9ef01a', '#00f5d4', '#f15bb5', '#fb8500'];
+const COLORS = ['#7a5c9e', '#2b7a78', '#a14b36', '#7d7a3c', '#4e6178', '#b0803f', '#8a4f6d', '#3f8a63', '#6b5a8e', '#5a8f9a', '#9a6a4a', '#58606b'];
 const EMOJIS = ['🦊', '🐸', '🦄', '🐙', '🦖', '🐼', '🦉', '🐝', '🐳', '🦁', '🐧', '🦋', '🐢', '🦩', '🐨', '🐯'];
 const CATEGORY_ORDER = Object.keys(CATEGORY_META) as Category[];
 
@@ -51,9 +51,8 @@ interface Answer {
 interface RoundData {
   options: (CardEntry & { category: Category })[];
   previewIndex: number;
-  categoryVotes: Map<string, number>;
+  pickerId: string | null;
   chosen: number | null;
-  tally: number[] | null;
   participants: Set<string>;
   submissions: Map<string, string>;
   answers: Answer[];
@@ -90,6 +89,7 @@ export class Room {
   players = new Map<string, Player>();
   phase: Phase = 'lobby';
   round = 0;
+  private lastPickerId: string | null = null;
   cur: RoundData = this.freshRound();
   private used: Record<Category, Set<number>> = { word: new Set(), date: new Set(), movie: new Set(), acronym: new Set(), person: new Set() };
 
@@ -184,7 +184,7 @@ export class Room {
 
   private afterPlayerPresenceChange(p: Player, joined: boolean) {
     // Anyone arriving before the writing phase ends gets to play the current round.
-    const early: Phase[] = ['preview', 'categoryVote', 'categoryResult', 'writing'];
+    const early: Phase[] = ['preview', 'categoryPick', 'categoryResult', 'writing'];
     if (joined && early.includes(this.phase)) this.cur.participants.add(p.id);
     if (!this.maybeAdvance()) this.broadcast();
   }
@@ -202,7 +202,6 @@ export class Room {
     if (p.socketId) this.io.to(p.socketId).emit('closed', 'You were removed from the game by the host.');
     this.players.delete(playerId);
     this.cur.participants.delete(playerId);
-    this.cur.categoryVotes.delete(playerId);
     this.cur.submissions.delete(playerId);
     this.cur.votes.delete(playerId);
     this.cur.readChecks.delete(playerId);
@@ -303,6 +302,7 @@ export class Room {
     if (this.phase !== 'gameOver') return;
     this.phase = 'lobby';
     this.round = 0;
+    this.lastPickerId = null;
     this.cur = this.freshRound();
     for (const p of this.players.values()) p.score = 0;
     this.arm(null, () => {});
@@ -314,9 +314,8 @@ export class Room {
     return {
       options: [],
       previewIndex: 0,
-      categoryVotes: new Map(),
+      pickerId: null,
       chosen: null,
-      tally: null,
       participants: new Set(),
       submissions: new Map(),
       answers: [],
@@ -344,6 +343,8 @@ export class Room {
   private startRound() {
     this.round++;
     this.cur = this.freshRound();
+    this.cur.pickerId = this.choosePicker();
+    this.lastPickerId = this.cur.pickerId;
     this.cur.options = shuffle(CATEGORY_ORDER).map((category) => ({ category, ...this.drawCard(category) }));
     for (const p of this.players.values()) if (p.socketId) this.cur.participants.add(p.id);
     this.phase = 'preview';
@@ -356,22 +357,29 @@ export class Room {
       this.cur.previewIndex++;
       this.arm(this.sec(this.settings.timers.preview), () => this.nextPreview());
     } else {
-      this.enterCategoryVote();
+      this.enterCategoryPick();
     }
   }
 
-  private enterCategoryVote() {
-    this.phase = 'categoryVote';
-    this.arm(this.sec(this.settings.timers.categoryVote), () => this.resolveCategory());
+  /** Round-robin: the next connected player (in join order) after last round's picker. */
+  private choosePicker(): string | null {
+    const all = [...this.players.values()];
+    const start = this.lastPickerId ? all.findIndex((p) => p.id === this.lastPickerId) : -1;
+    for (let k = 1; k <= all.length; k++) {
+      const p = all[(start + k + all.length) % all.length];
+      if (p.socketId) return p.id;
+    }
+    return null;
+  }
+
+  private enterCategoryPick() {
+    this.phase = 'categoryPick';
+    this.arm(this.sec(this.settings.timers.categoryPick), () => this.resolveCategory());
   }
 
   private resolveCategory() {
-    const tally = this.cur.options.map(() => 0);
-    for (const idx of this.cur.categoryVotes.values()) tally[idx]++;
-    const max = Math.max(...tally);
-    const winners = tally.map((n, i) => (n === max ? i : -1)).filter((i) => i >= 0);
-    this.cur.chosen = pickRandom(winners);
-    this.cur.tally = tally;
+    // Picker didn't choose in time (or left): pick for them.
+    if (this.cur.chosen == null) this.cur.chosen = rand(this.cur.options.length);
     this.phase = 'categoryResult';
     this.arm(CATEGORY_RESULT_MS, () => this.enterWriting());
   }
@@ -476,10 +484,10 @@ export class Room {
     return this.cur.participants.has(id);
   }
 
-  categoryVote(playerId: string, index: number) {
-    if (this.phase !== 'categoryVote' || !this.isParticipant(playerId)) return;
+  categoryPick(playerId: string, index: number) {
+    if (this.phase !== 'categoryPick' || playerId !== this.cur.pickerId) return;
     if (!Number.isInteger(index) || index < 0 || index >= this.cur.options.length) return;
-    this.cur.categoryVotes.set(playerId, index);
+    this.cur.chosen = index;
     if (!this.maybeAdvance()) this.broadcast();
   }
 
@@ -523,8 +531,8 @@ export class Room {
     const live = this.livePlayers();
     if (!live.length) return false;
     switch (this.phase) {
-      case 'categoryVote':
-        return live.every((id) => this.cur.categoryVotes.has(id));
+      case 'categoryPick':
+        return this.cur.chosen != null || !this.cur.pickerId || !this.isConnected(this.cur.pickerId);
       case 'writing':
         return live.every((id) => this.cur.submissions.has(id));
       case 'readAnswers': {
@@ -551,8 +559,8 @@ export class Room {
   private playerDone(id: string): boolean {
     if (!this.cur.participants.has(id)) return false;
     switch (this.phase) {
-      case 'categoryVote':
-        return this.cur.categoryVotes.has(id);
+      case 'categoryPick':
+        return this.cur.pickerId === id && this.cur.chosen != null;
       case 'writing':
         return this.cur.submissions.has(id);
       case 'readAnswers':
@@ -601,7 +609,7 @@ export class Room {
       options: past || this.phase === 'preview' ? options : [],
       previewIndex: c.previewIndex,
       chosen: ['categoryResult', 'writing', 'readAnswers', 'voting', 'reveal', 'summary', 'gameOver'].includes(this.phase) ? c.chosen : null,
-      tally: this.phase === 'categoryResult' ? c.tally : null,
+      pickerId: c.pickerId,
       answers,
       readIndex: c.readIndex,
       answerTotal: c.answers.length,
@@ -627,7 +635,7 @@ export class Room {
         you: {
           id: p.id,
           participating: c.participants.has(p.id),
-          categoryVote: c.categoryVotes.get(p.id) ?? null,
+          isPicker: c.pickerId === p.id,
           submitted: c.submissions.has(p.id),
           submittedText: c.submissions.get(p.id) ?? null,
           hasRead: c.readChecks.has(p.id) || c.answers[c.readIndex]?.authorId === p.id,

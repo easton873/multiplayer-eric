@@ -19,7 +19,6 @@ let joinError = '';
 let viewKey = '';
 let draft = '';
 let selectedAnswer: string | null = null;
-let pendingCat: number | null = null;
 let closedMsg = '';
 
 const params = new URLSearchParams(location.search);
@@ -136,7 +135,7 @@ function buildView(s: ClientState): View {
   const roundKicker = `Round ${s.round}`;
 
   // Spectators in a round already past the point where they can join in.
-  const playPhases = ['preview', 'categoryVote', 'categoryResult', 'writing', 'readAnswers', 'voting', 'reveal'];
+  const playPhases = ['preview', 'categoryPick', 'categoryResult', 'writing', 'readAnswers', 'voting', 'reveal'];
   if (playPhases.includes(s.phase) && !you.participating) {
     return {
       header: header(roundKicker, 'Round in progress'),
@@ -159,29 +158,30 @@ function buildView(s: ClientState): View {
           .join(''),
       };
 
-    case 'categoryVote':
+    case 'categoryPick': {
+      if (!you.isPicker) {
+        const picker = s.players.find((p) => p.id === s.pickerId);
+        return {
+          header: header(roundKicker, `${esc(picker?.name ?? 'Someone')} is choosing`, { sub: 'Which prompt should we play?', timer: true }),
+          main: centerView(picker?.emoji ?? '🤔', `${esc(picker?.name ?? 'Someone')} picks this round`, 'Hang tight — look at the big screen.'),
+        };
+      }
       return {
-        header: header(roundKicker, 'Vote for a prompt', { sub: 'Which one should we play?', timer: true }),
+        header: header(roundKicker, "It's your pick!", { sub: 'Choose the prompt everyone will play', timer: true }),
         main: s.options
-          .map((o, i) => {
-            const sel = (pendingCat ?? you.categoryVote) === i;
-            return `<button class="opt-btn cat-${o.category} ${sel ? 'sel' : ''}" data-cat="${i}"><span class="ic">${CATEGORY_META[o.category].icon}</span><div><div class="lbl">${CATEGORY_META[o.category].label}</div><div class="pr">${esc(o.prompt)}</div></div></button>`;
-          })
+          .map((o, i) => `<button class="opt-btn cat-${o.category}" data-cat="${i}"><span class="ic">${CATEGORY_META[o.category].icon}</span><div><div class="lbl">${CATEGORY_META[o.category].label}</div><div class="pr">${esc(o.prompt)}</div></div></button>`)
           .join(''),
-        footer: `<div class="counter" style="text-align:center">${you.categoryVote != null ? 'Vote saved — tap another to change it' : 'Tap one to vote'}</div>`,
+        footer: `<div class="counter" style="text-align:center">Tap one to choose it</div>`,
         after: () =>
           app.querySelectorAll<HTMLElement>('[data-cat]').forEach((b) =>
-            b.addEventListener('click', () => {
-              pendingCat = Number(b.dataset.cat);
-              socket.emit('player:categoryVote', { index: pendingCat });
-              render(true);
-            }),
+            b.addEventListener('click', () => socket.emit('player:categoryPick', { index: Number(b.dataset.cat) })),
           ),
       };
+    }
 
     case 'categoryResult':
       return {
-        header: header(roundKicker, 'The people have spoken!'),
+        header: header(roundKicker, `${esc(s.players.find((p) => p.id === s.pickerId)?.name ?? 'Someone')} chose!`),
         main: chosen
           ? `<div class="center cat-${chosen.category}"><div class="big-emoji">${meta!.icon}</div><h2 style="color:var(--c)">${meta!.label}</h2><p style="color:var(--ink);font-weight:800;font-size:22px">${esc(chosen.prompt)}</p></div>`
           : '',
@@ -314,8 +314,8 @@ function viewKeyFor(s: ClientState): string {
       return `${base}|${s.players.length}|${s.players.map((p) => p.connected).join('')}`;
     case 'preview':
       return `${base}|${s.previewIndex}`;
-    case 'categoryVote':
-      return `${base}|${y.categoryVote}`;
+    case 'categoryPick':
+      return `${base}|${y.isPicker}|${s.pickerId}`;
     case 'writing':
       return `${base}|${y.submitted}`;
     case 'readAnswers':
@@ -339,7 +339,6 @@ function render(force = false) {
   const key = viewKeyFor(s);
   if (!force && key === viewKey) return;
   if (key.split('|')[0] !== viewKey.split('|')[0] || key.split('|')[1] !== viewKey.split('|')[1]) {
-    pendingCat = null;
     selectedAnswer = null;
   }
   viewKey = key;
